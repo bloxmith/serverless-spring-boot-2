@@ -1,0 +1,114 @@
+service: chazhuang
+
+frameworkVersion: '^3.22.0'
+
+provider:
+  name: aws
+  # stage: dev # Default stage (default: dev)
+  region: ap-east-1 # Default region (default: us-east-1)
+  # profile: production # The AWS profile to use to deploy (default: "default" profile)
+  # stackName: custom-stack-name # Use a custom name for the CloudFormation stack
+  runtime: java11
+  # memorySize: 512 # Default memory size for functions (default: 1024MB)
+  # timeout: 10 # Default timeout for functions (default: 6 seconds) Note: API Gateway has a maximum timeout of 30 seconds
+  # logRetentionInDays: 14 # Duration for CloudWatch log retention (default: forever)
+  # architecture: arm64 # Processor architecture: 'x86_64' or 'arm64' via Graviton2 (default: x86_64)
+  # deploymentPrefix: serverless # The S3 prefix under which deployed artifacts are stored (default: serverless)
+  # deploymentBucket: # Configure the S3 bucket used by Serverless Framework to deploy code packages to Lambda
+  #   blockPublicAccess: true # Prevents public access via ACLs or bucket policies (default: false)  Note: the deployment bucket is not public by default. These are additional ACLs.
+  #   skipPolicySetup: true # Skip the creation of a default bucket policy when the deployment bucket is created (default: false)
+  httpApi:
+    disableDefaultEndpoint: true # Disable the default 'execute-api' HTTP endpoint (default: false) Useful when using a custom domain.
+    metrics: true # Enable detailed CloudWatch metrics (default: false)
+    cors: true # Enable CORS HTTP headers with default settings (allow all) Can be fine-tuned with specific options
+  # ecr:
+  #   scanOnPush: true
+  #   images: # Definitions of images that later can be referenced by key in `function.image`
+  #     baseimage:
+  #       uri: 000000000000.dkr.ecr.us-east-1.amazonaws.com/test-image@sha256:6bb600b4d6e1d7cf521097177d111111ea373edb91984a505333be8ac9455d38 # URI of an existing Docker image in ECR
+  #     anotherimage:
+  #       path: ./image/ # Path to the Docker context that will be used when building that image locally (default: '.')
+  #       file: Dockerfile.dev # Dockerfile that will be used when building the image locally (default: 'Dockerfile')
+  #       buildArgs:
+  #         STAGE: ${sls:stage}
+  #       cacheFrom:
+  #         - my-image:latest
+  # Optional VPC settings
+  # If you use VPC then both securityGroupIds and subnetIds are required
+  # vpc:
+  #   securityGroupIds:
+  #     - securityGroupId1
+  #     - securityGroupId2
+  #   subnetIds:
+  #     - subnetId1
+  #     - subnetId2
+  # logs:
+  #   # Enable HTTP API logs
+  #   # This can either be set to `httpApi: true` to use defaults, or configured via subproperties
+  #   # Can only be configured if the API is created by Serverless Framework
+  #   httpApi:
+  #     format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+  #   # Enable REST API logs
+  #   # This can either be set to `restApi: true` to use defaults, or configured via subproperties
+  #   # Can only be configured if the API is created by Serverless Framework
+  #   restApi:
+  #     accessLogging: true # Enables HTTP access logs (default: true)
+  #     format: 'requestId: $context.requestId' # Log format to use for access logs
+  #     executionLogging: true # Enable execution logging (default: true)
+  #     level: INFO # Log level to use for execution logging: INFO or ERROR
+  #     fullExecutionData: true # Log full requests/responses for execution logging (default: true)
+  #     role: arn:aws:iam::123456:role # Existing IAM role to use for API Gateway when writing CloudWatch Logs (default: automatically created)
+  #     roleManagedExternally: false # Whether the API Gateway CloudWatch Logs role setting is not managed by Serverless (default: false)
+  #   # Enable Websocket API logs
+  #   # This can either be set to `websocket: true` to use defaults, or configured via subproperties.
+  #   websocket:
+  #     accessLogging: true # Enables HTTP access logs (default: true)
+  #     format: 'requestId: $context.requestId' # Log format to use for access logs
+  #     executionLogging: true # Enable execution logging (default: true)
+  #     level: INFO # Log level to use for execution logging: INFO or ERROR
+  #     fullExecutionData: true # Log full requests/responses for execution logging (default: true)
+  #   frameworkLambda: true # Optional, whether to write CloudWatch logs for custom resource lambdas as added by the framework
+  # s3: # If you need to configure the bucket itself, you'll need to add s3 resources to the provider configuration
+  #   bucketOne: # Eventual additional properties in camel case
+  #     # Supported properties are the same ones as supported by CF resource for S3 bucket
+  #     # See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html
+  #     name: my-custom-bucket-name
+  #     versioningConfiguration:
+  #       Status: Enabled
+
+package:
+  artifact: target/application.jar # Explicitly set the package artifact to deploy (overrides native packaging behavior)
+
+functions:
+  function_name: # A function
+    handler: tw.codethefuckup.teahouse.StreamLambdaHandler # The file and module for this specific function. Cannot be used with 'image'.
+    # image: baseimage # Container image to use. Cannot be used with 'handler'. Can be the URI of an image in ECR, or the name of an image defined in 'provider.ecr.images'
+    # runtime: java11
+    # memorySize: 512 # Memory size (default: 1024MB)
+    # timeout: 10 # Timeout (default: 6 seconds) Note: API Gateway has a maximum timeout of 30 seconds
+    # ephemeralStorageSize: 512 # Configure the size of ephemeral storage available to your Lambda function (in MBs, default: 512)
+    # # Override the Lambda function name
+    # name: ${sls:stage}-lambdaName
+    # description: My function
+    # architecture: arm64 # Processor architecture: 'x86_64' or 'arm64' via Graviton2 (default: x86_64)
+    # disableLogs: false # Disable the creation of the CloudWatch log group
+    # logRetentionInDays: 14 # Duration for CloudWatch log retention (default: forever).
+    # VPC settings for this function
+    # If you use VPC then both subproperties (securityGroupIds and subnetIds) are required
+    # Can be set to '~' to disable the use of a VPC
+    # vpc:
+    #   securityGroupIds:
+    #     - securityGroupId1
+    #     - securityGroupId2
+    #   subnetIds:
+    #     - subnetId1
+    #     - subnetId2
+    # package: # Packaging rules specific to this function
+    #   artifact: path/to/my-artifact.zip # Explicitly set the package artifact to deploy (overrides native packaging behavior)
+    events:
+    - httpApi:
+        method: GET
+        path: /ping
+    - httpApi:
+        method: POST
+        path: /ping
